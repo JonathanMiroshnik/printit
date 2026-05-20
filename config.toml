@@ -3,8 +3,12 @@
 # API keys should be in .streamlit/secrets.toml
 
 [app]
-title = "STIKKA FACTORY"
+title = "The Unlimited Dream Company"
 privacy_mode = true
+
+# Webhook: send printed image data to an external API
+webhook_enabled = true
+webhook_url = "https://api.sensorcensor.xyz/festivalin"
 
 [ui]
 history_limit = 15
@@ -28,8 +32,6 @@ enabled = [
     "Label",
     "Sticker",
     "Sticker Pro",
-    "Text2image",
-    "Webcam",
     "Dog",
     "Cat",
     "History",

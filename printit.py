@@ -154,18 +154,18 @@ def find_url(string):
 # ============================================================================
 
 if not os.path.exists(".streamlit/secrets.toml"):
-    st.error("⚠️ No secrets.toml file found!")
+    st.error("⚠️ קובץ secrets.toml לא נמצא!")
     st.info("""
-    Please set up your `.streamlit/secrets.toml` file:
-    1. Copy the example file: `cp .streamlit/secrets.toml.example .streamlit/secrets.toml`
-    2. Edit the file with your settings
+    נא להגדיר את קובץ `.streamlit/secrets.toml`:
+    1. העתק את קובץ הדוגמה: `cp .streamlit/secrets.toml.example .streamlit/secrets.toml`
+    2. ערוך את הקובץ עם ההגדרות שלך
     
-    The app will try to auto-detect your printer's label type, but you can override it in secrets.toml if needed.
-    See the example file for all available options and their descriptions.
+    האפליקציה תנסה לזהות אוטומטית את סוג המדפסת שלך, אבל תוכל לשנות את זה ב‑secrets.toml אם צריך.
+    ראה את קובץ הדוגמה לכל האפשרויות הזמינות וההסברים שלהן.
     """)
 
 st.title(f":rainbow[**{APP_TITLE}**]")
-st.subheader(":primary[:printer: hard copies of images and text]")
+st.subheader(":primary[:printer: הדפסות של תמונות וטקסט]")
 
 
 # ============================================================================
@@ -200,7 +200,7 @@ def get_cached_printers():
             
     return st.session_state.cached_printers
 
-st.sidebar.title(":primary[Settings]")
+st.sidebar.title(":primary[הגדרות]")
 
 printers = get_cached_printers()
 
@@ -221,18 +221,18 @@ for p in printers:
 
 logger.info(f"Total available printers: {len(available_printers)}")
 
-st.sidebar.subheader(":primary[Printer Selection]")
-printer = st.sidebar.radio("**Available Printer**", available_printers)
+st.sidebar.subheader(":primary[בחירת מדפסת]")
+printer = st.sidebar.radio("**מדפסת זמינה**", available_printers)
 selected_printer = next((p for p in printers if p["name"] == printer), None)
 
 if not selected_printer:
-    st.error("❌ No available printers detected! Check connections, power and paper.")
+    st.error("❌ לא נמצאו מדפסות זמינות! בדוק חיבורים, חשמל ונייר.")
     
-    st.sidebar.subheader("Detected Printers")
+    st.sidebar.subheader("מדפסות שזוהו")
     for p in printers:
         status_color = "green" if p['status'] == 'Waiting to receive' else "red"
         label_color = "green" if p['label_type'] != 'unknown' else "red"
-        st.sidebar.markdown(f":primary[**{p['name']}**]\n- Label Size: :{label_color}[{p['label_size']}]\n- Status:  :{status_color}[{p['status']}]")
+        st.sidebar.markdown(f":primary[**{p['name']}**]\n- גודל תווית: :{label_color}[{p['label_size']}]\n- סטטוס:  :{status_color}[{p['status']}]")
     #st.stop()   
 
 else:
@@ -240,14 +240,14 @@ else:
     label_type = selected_printer['label_type']
     label_width = selected_printer['label_width']
 
-    st.sidebar.subheader(":primary[Detected Printers]")
+    st.sidebar.subheader(":primary[מדפסות שזוהו]")
     for p in printers: 
         status_color = "green" if p['status'] == 'Waiting to receive' else "red"
         label_color = "green" if p['label_type'] != 'unknown' else "red"
         if p.name == selected_printer['name']:
-            st.sidebar.markdown(f":green[**{p['name']}**]\n- Label Size: :{label_color}[{p['label_size']}]\n- Status:  :{status_color}[{p['status']}]")
+            st.sidebar.markdown(f":green[**{p['name']}**]\n- גודל תווית: :{label_color}[{p['label_size']}]\n- סטטוס:  :{status_color}[{p['status']}]")
         else:     
-            st.sidebar.markdown(f":primary[**{p['name']}**]\n- Label Size: :{label_color}[{p['label_size']}]\n- Status:  :{status_color}[{p['status']}]")
+            st.sidebar.markdown(f":primary[**{p['name']}**]\n- גודל תווית: :{label_color}[{p['label_size']}]\n- סטטוס:  :{status_color}[{p['status']}]")
 
 
 
@@ -256,7 +256,7 @@ else:
     logger.debug(f"Enabled tabs: {enabled_tab_names}")
 
     if not enabled_tab_names:
-        st.error("❌ No tabs are enabled! Check config.toml ENABLED_TABS configuration")
+        st.error("❌ שום לשונית לא מופעלת! בדוק את תצורת ENABLED_TABS בקובץ config.toml")
         st.stop()
 
     # Create tabs dynamically
@@ -347,7 +347,7 @@ else:
                     import tabs.faq as faq_module
                     faq_module.render()
                 else:
-                    st.warning(f"Tab '{tab_name}' is not implemented yet")
+                    st.warning(f"הלשונית '{tab_name}' עדיין לא מומשה")
             except Exception as e:
-                st.error(f"Error rendering {tab_name} tab: {str(e)}")
+                st.error(f"שגיאה בעיבוד הלשונית {tab_name}: {str(e)}")
                 logger.error(f"Exception in tab {tab_name}: {e}", exc_info=True)

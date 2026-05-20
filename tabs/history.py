@@ -8,7 +8,7 @@ from datetime import datetime
 
 def render(list_saved_images, print_image, preper_image):
     """Render the History tab."""
-    st.subheader("Gallery of Labels and Stickers")
+    st.subheader("גלריית תוויות וסטיקרים")
     
     # Initialize session state variables if they don't exist
     if 'saved_images_list' not in st.session_state:
@@ -26,12 +26,12 @@ def render(list_saved_images, print_image, preper_image):
     # Search, filter, and refresh controls
     col1, col2, col3 = st.columns([3, 2, 1])
     with col1:
-        search_query = st.text_input("Search filenames", value=st.session_state.search_query, key="history_search")
+        search_query = st.text_input("חיפוש שמות קבצים", value=st.session_state.search_query, key="history_search")
     with col2:
-        filter_duplicates = st.checkbox("Filter duplicates", value=st.session_state.filter_duplicates, key="history_filter")
+        filter_duplicates = st.checkbox("סנן כפילויות", value=st.session_state.filter_duplicates, key="history_filter")
         st.session_state.filter_duplicates = filter_duplicates
     with col3:
-        if st.button("Refresh Gallery", key="history_refresh"):
+        if st.button("רענן גלריה", key="history_refresh"):
             st.session_state.saved_images_list = list_saved_images(filter_duplicates)
             st.session_state.page_number = 0
             st.rerun()
@@ -54,13 +54,13 @@ def render(list_saved_images, print_image, preper_image):
     # Pagination controls
     col1, col2, col3 = st.columns([1, 2, 1])
     with col1:
-        if st.button("Previous", disabled=st.session_state.page_number <= 0, key="history_prev"):
+        if st.button("קודם", disabled=st.session_state.page_number <= 0, key="history_prev"):
             st.session_state.page_number -= 1
             st.rerun()
     with col2:
-        st.write(f"Page {st.session_state.page_number + 1} of {total_pages}")
+        st.write(f"עמוד {st.session_state.page_number + 1} מתוך {total_pages}")
     with col3:
-        if st.button("Next", disabled=st.session_state.page_number >= total_pages - 1, key="history_next"):
+        if st.button("הבא", disabled=st.session_state.page_number >= total_pages - 1, key="history_next"):
             st.session_state.page_number += 1
             st.rerun()
     
@@ -74,7 +74,7 @@ def render(list_saved_images, print_image, preper_image):
     
     # Show total count of filtered images
     if len(filtered_images) > 0:
-        st.caption(f"Showing {len(current_page_images)} of {len(filtered_images)} images")
+        st.caption(f"מציג {len(current_page_images)} מתוך {len(filtered_images)} תמונות")
         
         # Display images in grid
         for i in range(0, len(current_page_images), cols_per_row):
@@ -96,15 +96,15 @@ def render(list_saved_images, print_image, preper_image):
                             
                             col1, col2 = st.columns(2)
                             with col1:
-                                if st.button("Print", key=f"print_history_{idx}_{st.session_state.page_number}"):
+                                if st.button("הדפס", key=f"print_history_{idx}_{st.session_state.page_number}"):
                                     image_to_print = Image.open(image_path).convert("RGB")
                                     grayscale_image, dithered_image = preper_image(image_to_print)
                                     print_image(grayscale_image, dither=True)
                             with col2:
-                                if st.button("Send to Sticker", key=f"send_to_sticker_{idx}_{st.session_state.page_number}"):
+                                if st.button("שלח לסטיקר", key=f"send_to_sticker_{idx}_{st.session_state.page_number}"):
                                     st.session_state.selected_image_path = image_path
                                     st.rerun()
                         except Exception as e:
-                            st.error(f"Error loading image: {str(e)}")
+                            st.error(f"שגיאה בטעינת תמונה: {str(e)}")
     else:
-        st.info("No images in history yet. Print some images to see them here!")
+        st.info("אין תמונות בהיסטוריה עדיין. הדפס תמונות כדי לראות אותן כאן!")

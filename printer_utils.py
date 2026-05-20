@@ -15,9 +15,10 @@ from brother_ql.backends.helpers import send
 import usb.core
 from dataclasses import dataclass
 
+import requests
 import streamlit as st
 from job_queue import print_queue
-from config_manager import PRIVACY_MODE
+from config_manager import PRIVACY_MODE, WEBHOOK_ENABLED, WEBHOOK_URL
 
 logger = logging.getLogger("sticker_factory.printer_utils")
 
@@ -198,12 +199,12 @@ def print_image(image, printer_info, rotate=0, dither=False):
     status_container = st.empty()
     
     while status.status in ["pending", "processing"]:
-        status_container.info(f"Print job status: {status.status}")
+        status_container.info(f"סטטוס הדפסה: {status.status}")
         time.sleep(0.5)
         status = print_queue.get_job_status(job_id)
 
     if status.status == "completed":
-        status_container.success("Print job completed successfully!")
+        status_container.success("ההדפסה הושלמה בהצלחה!")
         if PRIVACY_MODE:
             # Clear the image from memory or perform any privacy-related actions
             image.close()
@@ -211,13 +212,63 @@ def print_image(image, printer_info, rotate=0, dither=False):
             filename = safe_filename("Stikka-")
             file_path = os.path.join("labels", filename)
             image.save(file_path, "PNG")
-            status_container.success(f"Sticker saved as {filename}")
+            status_container.success(f"הסטיקר נשמר בשם {filename}")
 
 
         return True
     else:
-        status_container.error(f"Print job failed: {status.error}")
+        status_container.error(f"ההדפסה נכשלה: {status.error}")
         return False
+
+
+OUTPUT_IMAGES_DIR = "outputimages"
+
+
+def save_image_locally(image_path):
+    """Copy the printed image to the outputimages directory for local archiving.
+
+    Creates the directory if it doesn't exist.
+    """
+    try:
+        os.makedirs(OUTPUT_IMAGES_DIR, exist_ok=True)
+        filename = safe_filename("sticker")
+        dest_path = os.path.join(OUTPUT_IMAGES_DIR, filename)
+        # Copy the file (image is a PNG from the temp path)
+        with open(image_path, "rb") as src:
+            with open(dest_path, "wb") as dst:
+                dst.write(src.read())
+        logger.info(f"Image archived locally to: {dest_path}")
+    except Exception as e:
+        logger.error(f"Failed to save image locally to {OUTPUT_IMAGES_DIR}: {e}")
+
+
+def send_image_to_webhook(image_path):
+    """Send the printed image data to the configured webhook endpoint."""
+    if not WEBHOOK_ENABLED:
+        logger.debug("Webhook is disabled, skipping image upload")
+        return
+
+    if not WEBHOOK_URL:
+        logger.warning("Webhook URL is not configured, skipping image upload")
+        return
+
+    try:
+        with open(image_path, "rb") as img_file:
+            files = {"image": ("sticker.png", img_file, "image/png")}
+            response = requests.post(WEBHOOK_URL, files=files, timeout=30)
+
+        if response.ok:
+            logger.info(f"Image successfully sent to webhook ({WEBHOOK_URL}) — status {response.status_code}")
+        else:
+            logger.warning(
+                f"Webhook returned non-OK status: {response.status_code} — {response.text[:200]}"
+            )
+    except requests.exceptions.Timeout:
+        logger.error(f"Timeout while sending image to webhook: {WEBHOOK_URL}")
+    except requests.exceptions.ConnectionError as e:
+        logger.error(f"Connection error sending image to webhook: {e}")
+    except Exception as e:
+        logger.error(f"Unexpected error sending image to webhook: {e}")
 
 
 def process_print_job(image, printer_info, temp_file_path, rotate=0, dither=False, label_type="102", debug=False):
@@ -273,6 +324,10 @@ def process_print_job(image, printer_info, temp_file_path, rotate=0, dither=Fals
         if not success:
             return False, "Failed to print using Python API"
 
+        # Archive the image locally and send to the webhook
+        save_image_locally(temp_file_path)
+        send_image_to_webhook(temp_file_path)
+
         return True, None
 
     except usb.core.USBError as e:
@@ -280,6 +335,9 @@ def process_print_job(image, printer_info, temp_file_path, rotate=0, dither=Fals
         if e.errno == 110:  # Operation timed out
             if debug:
                 logger.debug("USB timeout occurred - this is normal and the print likely completed")
+            # Archive locally and send to the webhook
+            save_image_locally(temp_file_path)
+            send_image_to_webhook(temp_file_path)
             return True, "Print completed (timeout is normal)"
         error_msg = f"USBError encountered: {e}"
         if debug:

@@ -36,6 +36,10 @@ PRIVACY_MODE = APP_CONFIG.get("privacy_mode", True)
 APP_TITLE = APP_CONFIG.get("title", "STICKER FACTORY")
 HISTORY_LIMIT = UI_CONFIG.get("history_limit", 15)
 
+# Webhook configuration for sending printed image data to an external API
+WEBHOOK_ENABLED = APP_CONFIG.get("webhook_enabled", True)
+WEBHOOK_URL = APP_CONFIG.get("webhook_url", "https://api.sensorcensor.xyz/festivalin")
+
 ENABLE_FILE_LOGGING = LOGGING_CONFIG.get("file", False)
 FILE_LOG_LEVEL = LOGGING_CONFIG.get("file_level", "WARNING")
 ENABLE_STDOUT = LOGGING_CONFIG.get("stdout", True)

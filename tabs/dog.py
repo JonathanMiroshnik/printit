@@ -8,8 +8,8 @@ from PIL import Image
 
 def render(preper_image,printer_info, print_image):
     """Render the Dog tab."""
-    st.subheader(":printer: a doggo")
-    st.caption("from the fine folks at https://thedogapi.com/")
+    st.subheader(":printer: כלבלב")
+    st.caption("באדיבות https://thedogapi.com/")
     
     # Initialize session state for dog image if not exists
     if 'dog_image' not in st.session_state:
@@ -23,7 +23,7 @@ def render(preper_image,printer_info, print_image):
     #     st.warning("⚠️ Dog API key is not configured")
     #     st.info("Add your dog_api_key to .streamlit/secrets.toml")
     if True:
-        if st.button("Fetch dog"):
+        if st.button("שלוף כלב"):
             try:
                 # Get dog image URL
                 response = requests.get(
@@ -45,11 +45,11 @@ def render(preper_image,printer_info, print_image):
                 st.session_state.dog_dithered = dithered_image
                 
             except Exception as e:
-                st.error(f"Error fetching dog: {str(e)}")
+                st.error(f"שגיאה בשליפת כלב: {str(e)}")
             
         # Show image and print button if we have a dog
         if st.session_state.dog_dithered is not None:
-            st.image(st.session_state.dog_dithered, caption="Dog!")
-            if st.button("Print Dog", key="print_dog"):
+            st.image(st.session_state.dog_dithered, caption="כלב!")
+            if st.button("הדפס כלב", key="print_dog"):
                 print_image(st.session_state.dog_image, printer_info, dither=True)
-                st.success("Dog sent to printer!")
+                st.success("הכלב נשלח למדפסת!")
