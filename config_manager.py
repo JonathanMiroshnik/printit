@@ -34,6 +34,7 @@ LOGGING_CONFIG = CONFIG.get("logging", {})
 
 PRIVACY_MODE = APP_CONFIG.get("privacy_mode", True)
 APP_TITLE = APP_CONFIG.get("title", "STICKER FACTORY")
+LANGUAGE = APP_CONFIG.get("language", "english")
 HISTORY_LIMIT = UI_CONFIG.get("history_limit", 15)
 
 # Webhook configuration for sending printed image data to an external API

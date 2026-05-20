@@ -1,3 +1,4 @@
+from i18n import t
 """FAQ tab content."""
 
 import streamlit as st
@@ -6,7 +7,7 @@ from PIL import Image
 
 def render():
     """Render the FAQ tab."""
-    st.subheader("שאלות נפוצות:")
+    st.subheader(t("faq_title"))
     st.markdown(
         """
         - *שיטוח (Dithering)* מומלץ (ולפעמים מחייב) אם המקור אינו קווי, כי גווני אפור וצבע נראים רע במדפסת תרמית

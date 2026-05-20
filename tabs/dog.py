@@ -1,4 +1,5 @@
-"""Cat tab content."""
+from i18n import t
+"""Dog tab content."""
 
 import streamlit as st
 import requests
@@ -8,8 +9,8 @@ from PIL import Image
 
 def render(preper_image,printer_info, print_image):
     """Render the Dog tab."""
-    st.subheader(":printer: כלבלב")
-    st.caption("באדיבות https://thedogapi.com/")
+    st.subheader(t("dog_tab_title"))
+    st.caption(t("dog_caption"))
     
     # Initialize session state for dog image if not exists
     if 'dog_image' not in st.session_state:
@@ -23,7 +24,7 @@ def render(preper_image,printer_info, print_image):
     #     st.warning("⚠️ Dog API key is not configured")
     #     st.info("Add your dog_api_key to .streamlit/secrets.toml")
     if True:
-        if st.button("שלוף כלב"):
+        if st.button(t("fetch_dog")):
             try:
                 # Get dog image URL
                 response = requests.get(
@@ -45,11 +46,11 @@ def render(preper_image,printer_info, print_image):
                 st.session_state.dog_dithered = dithered_image
                 
             except Exception as e:
-                st.error(f"שגיאה בשליפת כלב: {str(e)}")
+                st.error(t("dog_fetch_error", str(e)))
             
         # Show image and print button if we have a dog
         if st.session_state.dog_dithered is not None:
-            st.image(st.session_state.dog_dithered, caption="כלב!")
-            if st.button("הדפס כלב", key="print_dog"):
+            st.image(st.session_state.dog_dithered, caption=t("dog_caption_image"))
+            if st.button(t("print_dog"), key="print_dog"):
                 print_image(st.session_state.dog_image, printer_info, dither=True)
-                st.success("הכלב נשלח למדפסת!")
+                st.success(t("dog_sent"))

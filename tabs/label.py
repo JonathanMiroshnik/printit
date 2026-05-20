@@ -1,3 +1,4 @@
+from i18n import t
 """Label tab content - extracted from main file for modularity."""
 
 import logging
@@ -14,7 +15,7 @@ def render(printer_info, get_fonts, find_url, preper_image, print_image, img_con
     import qrcode
     from PIL import Image, ImageDraw, ImageFont
     
-    st.subheader(":printer: תווית")
+    st.subheader(t("label_tab_title"))
 
     label_type = printer_info["label_type"]
     label_width = printer_info["label_width"]
@@ -59,12 +60,12 @@ def render(printer_info, get_fonts, find_url, preper_image, print_image, img_con
             logger.error(f"Error in calculate_max_font_size: {e}")
             return 50
 
-    text = st.text_area("הכנס טקסט להדפסה", "כתוב משהו", height=200)
+    text = st.text_area(t("enter_text"), t("write_something"), height=200)
     
     if text:
         urls = find_url(text)
         if urls:
-            st.success("נמצאו URLs: אולי נהפוך אותם ל-QR code אוטומטית בעתיד")
+            st.success(t("urls_found"))
             for url in urls:
                 st.write(url)
 
@@ -99,14 +100,14 @@ def render(printer_info, get_fonts, find_url, preper_image, print_image, img_con
             
             if working_font:
                 font = working_font
-                st.warning(f"גופנים מותאמים אישית לא זמינים, משתמש בגופן מערכת: {working_font}")
+                st.warning(t("fonts_unavailable_warning", working_font))
             else:
                 try:
                     test_default = ImageFont.load_default()
                     font = None
-                    st.warning("אין גופני TrueType או OpenType זמינים, משתמש בגופן ברירת מחדל של PIL")
+                    st.warning(t("no_ttf_otf_warning"))
                 except Exception:
-                    st.error("לא ניתן לטעון שום גופן. נא לבדוק את התקנת הגופנים במערכת.")
+                    st.error(t("no_font_error"))
                     st.stop()
 
         try:
@@ -137,7 +138,7 @@ def render(printer_info, get_fonts, find_url, preper_image, print_image, img_con
             font_size = max_size
             logger.error(f"Error calculating font size: {e}")
 
-        fontstuff = st.checkbox("הגדרות גופן", value=False)
+        fontstuff = st.checkbox(t("font_settings"), value=False)
         col1, col2 = st.columns(2)
         if fontstuff:
             with col1:
@@ -178,7 +179,7 @@ def render(printer_info, get_fonts, find_url, preper_image, print_image, img_con
 
             with col2:
                 alignment_options = ["left", "center", "right"]
-                alignment = st.selectbox("בחר יישור טקסט", alignment_options, index=1)
+                alignment = st.selectbox(t("select_alignment"), alignment_options, index=1)
             
             try:
                 if font == "fonts/5x5-Tami.ttf":
@@ -198,7 +199,7 @@ def render(printer_info, get_fonts, find_url, preper_image, print_image, img_con
                     max_size = calculate_max_font_size(label_width, text, font)
             except Exception as e:
                 logger.error(f"Error calculating font size for {font}: {e}")
-            font_size = st.slider("גודל גופן", 20, max_size + 50, max_size, help="תומך בגופני TTF ו-OTF")
+            font_size = st.slider(t("font_size"), 20, max_size + 50, max_size, help=t("font_size_help"))
 
         try:
             if font is None:
@@ -209,13 +210,13 @@ def render(printer_info, get_fonts, find_url, preper_image, print_image, img_con
                 except (OSError, TypeError):
                     # Fallback if font loading fails (TTF or OTF)
                     fnt = ImageFont.load_default()
-                    st.warning(f"הגופן {font} לא נמצא, משתמש בגופן ברירת מחדל.")
+                    st.warning(t("font_load_error", font))
         except Exception as e:
             try:
                 fnt = ImageFont.load_default()
-                st.warning(f"שגיאה בטעינת הגופן {font}: {e}")
+                st.warning(t("font_load_error_warning", font, e))
             except Exception as load_e:
-                st.error(f"שגיאה בטעינת גופן: {load_e}")
+                st.error(t("font_load_error_fatal", load_e))
         
         line_spacing = 20
         new_image_height = calculate_actual_image_height_with_empty_lines(text, fnt, line_spacing)
@@ -247,7 +248,7 @@ def render(printer_info, get_fonts, find_url, preper_image, print_image, img_con
             y += text_height + line_spacing
 
         qr = qrcode.QRCode(border=0)
-        qrurl = st.text_input("הוסף QRcode לסטיקר")
+        qrurl = st.text_input(t("add_qr_code"))
         
         if qrurl:
             qr.add_data(qrurl)
@@ -257,17 +258,17 @@ def render(printer_info, get_fonts, find_url, preper_image, print_image, img_con
             if imgqr and img:
                 imgqr = img_concat_v(img, imgqr,image_width=label_width)
                 st.image(imgqr, width='stretch')
-                if st.button("הדפס סטיקר+קוד", key="print_sticker_qr"):
-                    print_image(imgqr)
+                if st.button(t("print_sticker_qr"), key="print_sticker_qr"):
+                    print_image(imgqr, printer_info=printer_info)
             elif imgqr and not (img):
-                if st.button("הדפס סטיקר", key="print_qr_only"):
-                    print_image(imgqr)
+                if st.button(t("print_qr_only"), key="print_qr_only"):
+                    print_image(imgqr, printer_info=printer_info)
 
         if text and not (qrurl):
             st.image(img, width='stretch')
-            if st.button("הדפס סטיקר", key="print_text_only"):
+            if st.button(t("print_text_only"), key="print_text_only"):
                 print_image(img,printer_info=printer_info)
-                st.success("הסטיקר נשלח למדפסת")
+                st.success(t("sticker_sent"))
         
         st.markdown("""
             * label will automaticly resize to fit the longest line, so use linebreaks.

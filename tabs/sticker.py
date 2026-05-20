@@ -1,3 +1,4 @@
+from i18n import t
 """Sticker tab content."""
 
 import logging
@@ -35,7 +36,7 @@ def fetch_image_from_url(url):
 
 def render(preper_image, print_image,printer_info):
     """Render the Sticker tab."""
-    st.subheader(":printer: סטיקר")
+    st.subheader(t("sticker_tab_title"))
 
     # Check if there's a selected image from history
     if 'selected_image_path' in st.session_state:
@@ -44,7 +45,7 @@ def render(preper_image, print_image,printer_info):
             image_to_process = Image.open(image_path).convert("RGB")
             grayscale_image, dithered_image = preper_image(image_to_process, label_width=printer_info['label_width'])
             
-            st.info(f"תמונה נטענה מההיסטוריה: {os.path.basename(image_path)}")
+            st.info(t("image_loaded_from_history", os.path.basename(image_path)))
             
             # Create checkboxes for rotation and dithering
             col1, col2 = st.columns(2)
@@ -54,13 +55,13 @@ def render(preper_image, print_image,printer_info):
                     key="dither_history"
                 )
             with col2:
-                rotate_checkbox = st.checkbox("סובב - _90 מעלות_", key="rotate_history")
+                rotate_checkbox = st.checkbox(t("rotate_90"), key="rotate_history")
 
             # Display image based on checkbox status
             if dither_checkbox:
-                st.image(dithered_image, caption="תמונה שעברה שינוי גודל ושיטוח")
+                st.image(dithered_image, caption=t("dithered_image_caption"))
             else:
-                st.image(image_to_process, caption="תמונה מקורית")
+                st.image(image_to_process, caption=t("original_image_caption"))
 
             # Print button
             button_text = "הדפס "
@@ -75,7 +76,7 @@ def render(preper_image, print_image,printer_info):
                 dither_value = dither_checkbox
                 print_image(image_to_process, rotate=rotate_value, dither=dither_value)
                 
-            if st.button("נקה בחירה"):
+            if st.button(t("clear_selection")):
                 del st.session_state.selected_image_path
                 st.rerun()
                 
@@ -91,7 +92,7 @@ def render(preper_image, print_image,printer_info):
     )
     
     # Or fetch from URL
-    image_url = st.text_input("או הכנס כתובת HTTPS של תמונה להורדה ולהדפסה")
+    image_url = st.text_input(t("image_url_input"))
 
     # Process uploaded file or URL
     if uploaded_image is not None:
@@ -140,7 +141,7 @@ def render(preper_image, print_image,printer_info):
                     key="sticker_dither"
                 )
             with col2:
-                rotate_checkbox = st.checkbox("סובב - _90 מעלות_", key="sticker_rotate")
+                rotate_checkbox = st.checkbox(t("rotate_90"), key="sticker_rotate")
 
             # Determine the button text based on checkbox states
             button_text = "הדפס "
@@ -159,9 +160,9 @@ def render(preper_image, print_image,printer_info):
             # Display image based on checkbox status
             try:
                 if dither_checkbox:
-                    st.image(dithered_image, caption="תמונה שעברה שינוי גודל ושיטוח")
+                    st.image(dithered_image, caption=t("dithered_image_caption"))
                 else:
-                    st.image(image_to_process, caption="תמונה מקורית")
+                    st.image(image_to_process, caption=t("original_image_caption"))
             
 
                 # Create 'temp' directory if it doesn't exist
@@ -188,7 +189,7 @@ def render(preper_image, print_image,printer_info):
                     key="dither_url"
                 )
             with col2:
-                rotate_checkbox = st.checkbox("סובב - _90 מעלות_", key="rotate_url")
+                rotate_checkbox = st.checkbox(t("rotate_90"), key="rotate_url")
 
             # Determine button text
             button_text = "הדפס "
@@ -206,9 +207,9 @@ def render(preper_image, print_image,printer_info):
 
             # Display image based on checkbox status
             if dither_checkbox:
-                st.image(dithered_image, caption="תמונה שעברה שינוי גודל ושיטוח")
+                st.image(dithered_image, caption=t("dithered_image_caption"))
             else:
-                st.image(image_to_process, caption="תמונה מקורית")
+                st.image(image_to_process, caption=t("original_image_caption"))
 
             # # Save original image
             # original_image_path = os.path.join("temp", filename)

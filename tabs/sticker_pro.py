@@ -1,3 +1,4 @@
+from i18n import t
 """Sticker Pro tab content - advanced image masking and processing with PDF support."""
 
 import logging
@@ -85,7 +86,7 @@ def make_meme_text(image, top_text, bottom_text, font_size=20, outline_width=3):
 def render(print_image,printer_info, apply_threshold, add_border, apply_histogram_equalization, 
            resize_image_to_width, preper_image):
     """Render the Sticker Pro tab."""
-    st.subheader(":printer: סטיקר למתקדמים")
+    st.subheader(t("sticker_pro_tab_title"))
     
     # Allow file upload or URL input
     uploaded_file = st.file_uploader(
@@ -93,7 +94,7 @@ def render(print_image,printer_info, apply_threshold, add_border, apply_histogra
         type=["jpg", "jpeg", "png", "gif", "webp", "bmp", "pdf"],
         key="sticker_pro_uploader"
     )
-    image_url = st.text_input("או הכנס כתובת HTTPS של תמונה להורדה ולעיבוד", key="sticker_pro_url")
+    image_url = st.text_input(t("sticker_pro_url"), key="sticker_pro_url")
     
     # Initialize image variable
     image = None
@@ -105,8 +106,8 @@ def render(print_image,printer_info, apply_threshold, add_border, apply_histogra
                 try:
                     import fitz  # PyMuPDF
                     
-                    st.info("זוהה קובץ PDF. ממיר את העמוד הראשון לתמונה.")
-                    dpi_selected = st.selectbox("בחר DPI להמרה", [72, 92, 150, 300, 600], index=1, key="sticker_pro_pdf_dpi")
+                    st.info(t("pdf_detected"))
+                    dpi_selected = st.selectbox(t("select_dpi"), [72, 92, 150, 300, 600], index=1, key="sticker_pro_pdf_dpi")
                     
                     # Open the PDF file
                     pdf_document = fitz.open(stream=uploaded_file.read(), filetype="pdf")
@@ -117,10 +118,10 @@ def render(print_image,printer_info, apply_threshold, add_border, apply_histogra
                     image = Image.open(io.BytesIO(pix.tobytes("png")))
                     
                 except ImportError:
-                    st.error("PyMuPDF (fitz) לא מותקן. התקן עם: pip install pymupdf")
+                    st.error(t("pymupdf_not_installed"))
                     st.stop()
                 except Exception as e:
-                    st.error(f"שגיאה בהמרת PDF: {str(e)}")
+                    st.error(t("pdf_error", str(e)))
                     st.stop()
             else:
                 # Process regular image file
@@ -146,7 +147,7 @@ def render(print_image,printer_info, apply_threshold, add_border, apply_histogra
                     st.error(f'שגיאה בעיבוד תמונה: {str(e)}')
     except Exception as e:
         st.error(f'שגיאה בטעינת תמונה: {str(e)}')
-        st.info("נסה תמונה או פורמט אחר")
+        st.info(t("try_image"))
     
     if image is not None:
         if image.mode == "RGBA":
@@ -158,11 +159,11 @@ def render(print_image,printer_info, apply_threshold, add_border, apply_histogra
         col1, col2 = st.columns([1, 1])
         
         with col1:
-            print_choice = st.radio("בחר איזו תמונה להדפיס/לשמור:", ("מקורית", "Threshold"), key="sticker_pro_choice")
+            print_choice = st.radio(t("choose_print_image"), (t("original_choice"), t("threshold_choice")), key="sticker_pro_choice")
             
-            st.text("אפשרויות כלליות:")
-            mirror_checkbox = st.checkbox("שיקוף תמונה", value=False, key="sticker_pro_mirror")
-            invert_checkbox = st.checkbox("היפוך צבעים", value=False, key="sticker_pro_invert")
+            st.text(t("general_options"))
+            mirror_checkbox = st.checkbox(t("mirror_image"), value=False, key="sticker_pro_mirror")
+            invert_checkbox = st.checkbox(t("invert_colors"), value=False, key="sticker_pro_invert")
             border_checkbox = st.checkbox(
                 "Show border in preview", 
                 value=True, 
@@ -184,13 +185,13 @@ def render(print_image,printer_info, apply_threshold, add_border, apply_histogra
         
             
             # Add target width in mm option
-            target_width_mm = st.number_input('רוחב מטרה (מ"מ)', min_value=0, value=0, key="sticker_pro_width")
+            target_width_mm = st.number_input(t('target_width_mm'), min_value=0, value=0, key="sticker_pro_width")
             
             # Disable rotation if target width is specified
             rotate_disabled = target_width_mm > 0
-            rotate_checkbox = st.checkbox("סובב 90 מעלות", value=False, disabled=rotate_disabled, key="sticker_pro_rotate")
+            rotate_checkbox = st.checkbox(t("rotate_90"), value=False, disabled=rotate_disabled, key="sticker_pro_rotate")
             if rotate_disabled and rotate_checkbox:
-                st.info("סיבוב מבוטל כשמצוין רוחב מטרה")
+                st.info(t("rotate_disabled_note"))
             
             # Apply target width resizing if specified
             if target_width_mm > 0:
@@ -205,12 +206,12 @@ def render(print_image,printer_info, apply_threshold, add_border, apply_histogra
             black_point = 0
             white_point = 255
             if equalize_checkbox:
-                st.text("כיוונון רמות:")
+                st.text(t("levels_adjustment"))
                 col_levels1, col_levels2 = st.columns(2)
                 with col_levels1:
-                    black_point = st.slider("נקודה שחורה", 0, 255, 0, key="sticker_pro_black_point")
+                    black_point = st.slider(t("black_point"), 0, 255, 0, key="sticker_pro_black_point")
                 with col_levels2:
-                    white_point = st.slider("נקודה לבנה", 0, 255, 255, key="sticker_pro_white_point")
+                    white_point = st.slider(t("white_point"), 0, 255, 255, key="sticker_pro_white_point")
             
             # Apply histogram equalization if selected
             if equalize_checkbox:
@@ -221,11 +222,11 @@ def render(print_image,printer_info, apply_threshold, add_border, apply_histogra
             grayscale_image = None
             dithered_image = None
             if print_choice == "Original":
-                dither = st.checkbox("שיטוח (Dither) - קירוב גווני אפור באמצעות שיטוח", value=True, key="sticker_pro_dither")
+                dither = st.checkbox(t("dither_option"), value=True, key="sticker_pro_dither")
                 grayscale_image, dithered_image = preper_image(image, label_width=printer_info['label_width'])
                 display_image = dithered_image if dither else grayscale_image
             else:  # Threshold
-                threshold_percent = st.slider("סף (אחוזים)", 0, 100, 50, key="sticker_pro_threshold")
+                threshold_percent = st.slider(t("threshold_percent"), 0, 100, 50, key="sticker_pro_threshold")
                 threshold = int(threshold_percent * 255 / 100)
                 display_image = apply_threshold(image, threshold)
                 grayscale_image = image.convert("L")
@@ -234,10 +235,10 @@ def render(print_image,printer_info, apply_threshold, add_border, apply_histogra
             meme_top_text = ""
             meme_bottom_text = ""
             if meme_checkbox:
-                meme_top_text = st.text_input("טקסט עליון", key="sticker_pro_meme_top")
-                meme_bottom_text = st.text_input("טקסט תחתון", key="sticker_pro_meme_bottom")
-                meme_font_size = st.slider("גודל גופן מימ", 10, 100, 20, key="sticker_pro_meme_font_size_final")
-                meme_outline_width = st.slider("עובי קו מתאר מימ", 1, 10, 3, key="sticker_pro_meme_outline_width")
+                meme_top_text = st.text_input(t("meme_top_text"), key="sticker_pro_meme_top")
+                meme_bottom_text = st.text_input(t("meme_bottom_text"), key="sticker_pro_meme_bottom")
+                meme_font_size = st.slider(t("meme_font_size"), 10, 100, 20, key="sticker_pro_meme_font_size_final")
+                meme_outline_width = st.slider(t("meme_outline_width"), 1, 10, 3, key="sticker_pro_meme_outline_width")
 
             # Create a copy for display with border if needed
             preview_image = display_image.copy()
@@ -252,15 +253,15 @@ def render(print_image,printer_info, apply_threshold, add_border, apply_histogra
         with col2:
             st.image(preview_image, caption="Preview", width='stretch')
         
-        print_button_label = f"הדפס תמונה {print_choice}"
+        print_button_label = t("print_button_label", print_choice)
         if print_choice == "Original" and dither:
-            print_button_label += ", שיטוח"
+            print_button_label += t("dither_suffix")
         if rotate_checkbox and not rotate_disabled:
             print_button_label += ", Rotated 90°"
         if mirror_checkbox:
-            print_button_label += ", שיקוף"
+            print_button_label += t("mirror_suffix")
         if invert_checkbox:
-            print_button_label += ", היפוך צבעים"
+            print_button_label += t("invert_suffix")
         if target_width_mm > 0:
             print_button_label += f', רוחב: {target_width_mm}מ"מ'
         
@@ -276,4 +277,4 @@ def render(print_image,printer_info, apply_threshold, add_border, apply_histogra
                 print_image(print_display_image, printer_info, rotate=rotate, dither=dither)
             else:
                 print_image(print_display_image, printer_info, rotate=rotate, dither=False)
-            st.success("ההדפסה נשלחה למדפסת!")
+            st.success(t("print_sent"))

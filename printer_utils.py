@@ -1,3 +1,4 @@
+from i18n import t
 """Printer handling and detection utilities for the Sticker Factory."""
 
 import logging
@@ -199,12 +200,12 @@ def print_image(image, printer_info, rotate=0, dither=False):
     status_container = st.empty()
     
     while status.status in ["pending", "processing"]:
-        status_container.info(f"סטטוס הדפסה: {status.status}")
+        status_container.info(t("print_status", status.status))
         time.sleep(0.5)
         status = print_queue.get_job_status(job_id)
 
     if status.status == "completed":
-        status_container.success("ההדפסה הושלמה בהצלחה!")
+        status_container.success(t("print_completed"))
         if PRIVACY_MODE:
             # Clear the image from memory or perform any privacy-related actions
             image.close()
@@ -212,12 +213,12 @@ def print_image(image, printer_info, rotate=0, dither=False):
             filename = safe_filename("Stikka-")
             file_path = os.path.join("labels", filename)
             image.save(file_path, "PNG")
-            status_container.success(f"הסטיקר נשמר בשם {filename}")
+            status_container.success(t("sticker_saved_as", filename))
 
 
         return True
     else:
-        status_container.error(f"ההדפסה נכשלה: {status.error}")
+        status_container.error(t("print_failed", status.error))
         return False
 
 

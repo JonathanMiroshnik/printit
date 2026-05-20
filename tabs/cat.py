@@ -1,3 +1,4 @@
+from i18n import t
 """Cat tab content."""
 
 import logging
@@ -12,8 +13,8 @@ logger = logging.getLogger("sticker_factory.tabs.cat")
 
 def render(preper_image,printer_info, print_image):
     """Render the Cat tab."""
-    st.subheader(":printer: חתול")
-    st.caption("באדיבות https://thecatapi.com/")
+    st.subheader(t("cat_tab_title"))
+    st.caption(t("cat_caption"))
     
     # Initialize session state for cat image if not exists
     if 'cat_image' not in st.session_state:
@@ -27,7 +28,7 @@ def render(preper_image,printer_info, print_image):
     #     st.warning("⚠️ Cat API key is not configured")
     #     st.info("Add your cat_api_key to .streamlit/secrets.toml")
     if True:
-        if st.button("שלוף חתול"):
+        if st.button(t("fetch_cat")):
             try:
                 # Get cat image URL
                 response = requests.get(
@@ -50,11 +51,11 @@ def render(preper_image,printer_info, print_image):
                 
             except Exception as e:
                 logger.error(f"Error fetching cat: {str(e)}")
-                st.error(f"שגיאה בשליפת חתול: {str(e)}")
+                st.error(t("cat_fetch_error", str(e)))
             
         # Show image and print button if we have a cat
         if st.session_state.cat_dithered is not None:
-            st.image(st.session_state.cat_dithered, caption="חתול!")
-            if st.button("הדפס חתול", key="print_cat"):
+            st.image(st.session_state.cat_dithered, caption=t("cat_caption_image"))
+            if st.button(t("print_cat"), key="print_cat"):
                 print_image(st.session_state.cat_image, printer_info, dither=True)
-                st.success("החתול נשלח למדפסת!")
+                st.success(t("cat_sent"))

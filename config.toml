@@ -4,6 +4,7 @@
 
 [app]
 title = "The Unlimited Dream Company"
+language = "hebrew"  # "english" or "hebrew"
 privacy_mode = true
 
 # Webhook: send printed image data to an external API
